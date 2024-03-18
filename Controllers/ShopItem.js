@@ -24,9 +24,8 @@ const autoUpdate =async(req,res)=>{
     try{
         if(req.body.productFound)
         {
-            const newShopItem ={
-                const {shop,temName,description,price,quantity,netWeight,unit,category,imageUrl} = req.product
-            }
+                const {shopItemName,description,price,quantity,netWeight,unit,category,imageUrl} = req.body
+
         }
         else
         {
@@ -40,8 +39,5 @@ const autoUpdate =async(req,res)=>{
 
 
 
-module.exports = {
-    searchProduct
-};
+module.exports = {searchProduct,autoUpdate};
 
-//Parle-GŻ

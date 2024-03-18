@@ -9,7 +9,7 @@ router.post(
     '/create-shop',
     isAuth,
     uploads.single('shopImage'),
-    validateShopCreation, 
+    validateShopCreation,
     shopValidation,
     createShop
 );

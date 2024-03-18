@@ -18,9 +18,9 @@ router.post(
 
 //Route for creating itenary from search list
 router.post(
-    '/auto-manage-itenary',
+    '/create-itenary',
     isAuth,
-    createAutoShopItem,
+    createShopItem,
 );
 
 //Route for creating itenary from 

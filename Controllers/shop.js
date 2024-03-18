@@ -17,7 +17,7 @@ const uploads = multer({ storage: storage, fileFilter: fileFilter });
 
 const createShop = async (req, res) => {
     try {
-        const { shopName, address, latitude,longitude } = req.body;
+        const { shopName, address} = req.body;
         
         // Ensure that a file is uploaded
         if (!req.file) {
@@ -38,7 +38,7 @@ const createShop = async (req, res) => {
             address: address,
             location: {
                 type: 'Point',
-                coordinates: [longitude,latitude]
+                coordinates: [req.user.longitude,req.user.latitude]
             },
             image: resizedImageBuffer
         });
