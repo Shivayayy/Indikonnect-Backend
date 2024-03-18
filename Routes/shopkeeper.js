@@ -4,6 +4,7 @@ const { isAuth } = require('../MiddleWare/auth');
 
 const { createShop, uploads } = require('../Controllers/shop');
 const { validateShopCreation, shopValidation } = require('../MiddleWare/validation/shop'); 
+const {searchProduct,autoUpdate } = require('../Controllers/shopItem');
 
 // Route for creating a new shop
 router.post(
@@ -15,21 +16,11 @@ router.post(
     createShop
 );
 
-
-//Route for creating itenary from search list
 router.post(
-    '/create-itenary',
-    isAuth,
-    createShopItem,
-);
+    '/search-product',
+    isAuth ,
+    searchProduct,
+)
 
-//Route for creating itenary from 
-router.post(
-    '/manual-manage-itenary',
-    isAuth,
-    validateShopItemCreation,
-    shopItemValidation,
-    createManualShopItem,
-);
 
 module.exports = router;
