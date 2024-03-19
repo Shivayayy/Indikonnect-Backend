@@ -13,13 +13,18 @@ router.post(
     uploads.single('shopImage'),
     validateShopCreation, 
     shopValidation,
-    createShop
+    createShop,
 );
 
 router.post(
     '/search-product',
-    isAuth ,
     searchProduct,
+)
+
+router.post(
+    '/auto-update',
+    isAuth,
+    autoUpdate,
 )
 
 

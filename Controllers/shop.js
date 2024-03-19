@@ -17,7 +17,7 @@ const uploads = multer({ storage: storage, fileFilter: fileFilter });
 
 const createShop = async (req, res) => {
     try {
-        const { shopName, address} = req.body;
+        const { shopName, address ,latitude,longitude} = req.body;
         
         // Ensure that a file is uploaded
         if (!req.file) {
@@ -38,7 +38,7 @@ const createShop = async (req, res) => {
             address: address,
             location: {
                 type: 'Point',
-                coordinates: [req.user.longitude,req.user.latitude]
+                coordinates: [longitude,latitude]
             },
             image: resizedImageBuffer
         });
@@ -53,5 +53,5 @@ const createShop = async (req, res) => {
     }
 };
 
-// Export both createShop function and uploads middleware
+//Export both createShop function and uploads middleware
 module.exports = { createShop, uploads };

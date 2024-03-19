@@ -1,43 +1,36 @@
-const mongoose =require('mongoose');
+const mongoose = require('mongoose');
 
-const shopItemSchema =new mongoose.Schema({
+const ShopitemSchema = new mongoose.Schema({
+
+    itemId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Item',
+        required: true
+    },
     shopId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Shop',
         required: true
     },
-    itemName: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-    },
-    price :{
-        type :Number,
-        required :true,
-    },
-    quantity :{
-        type :Number,
-        required :true,
-    },
-    netWeight :{
-        type :Number
-    },
-    unit :{
-        type :Number,
-        required :true,
-    },
-    category: {
-        type: String,
-        required: true,
-        enum: ['Groceries', 'Fruits', 'Vegetables', 'Dairy', 'Bakery', 'Meat', 'Seafood', 'Beverages', 'Snacks', 'Household', 'Personal Care','Others'] 
-    },
-    imageUrl: {
-        type: String 
-    },
+    variants: [{
+        price: {
+            type: Number,
+            required: true
+        },
+        netWeight: {
+            type: Number,
+            required: true
+        },
+        unit: {
+            type: String,
+            enum: ['g', 'kg'],
+            required: true
+        },
+        quantity :{
+            type :Number,
+            required :true,
+        }
+    }],
+});
 
-})
-
-const shopItem = mongoose.model('shopItem', shopItemSchema);
-module.exports = shopItem;
+module.exports = mongoose.model('shopItem', ShopitemSchema, 'shopItem');

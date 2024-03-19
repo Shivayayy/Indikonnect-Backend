@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(userRouter);
 app.use(shopRouter);
+app.use(shopkeeperRouter);
 
 
 app.listen(8000, () => {

@@ -9,44 +9,39 @@ const itemSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    prices: [{
-        amount: {
+    variants: [{
+        price: {
             type: Number,
             required: true
         },
-        currency: {
-            type: String,
-            enum: ['USD', 'EUR', 'GBP', 'CAD', 'AUD'], 
-            required: true
-        }
-    }],
-    netWeight: {
-        value: {
+        netWeight: {
             type: Number,
+            required: true
         },
         unit: {
             type: String,
-            enum: ['g', 'kg', 'oz', 'lb'] 
-        }
-    },
-    units: [{
-        name: {
-            type: String,
-            required: true
-        },
-        quantity: {
-            type: Number,
+            enum: ['g', 'kg'],
             required: true
         }
     }],
     category: {
         type: String,
         required: true,
-        enum: ['Groceries', 'Fruits', 'Vegetables', 'Dairy', 'Bakery', 'Meat', 'Seafood', 'Beverages', 'Snacks', 'Household', 'Personal Care','Others'] 
+        enum: ['Groceries', 'Fruits', 'Vegetables', 'Dairy', 'Bakery', 'Meat', 'Seafood', 'Beverages', 'Snacks', 'Household', 'Personal Care', 'Others'] 
     },
     imageUrl: {
         type: String 
-    }
+    },
+    reviews: [{
+        rating: {
+            type: Number,
+            required: true
+        },
+        comment: {
+            type: String,
+            required: true
+        }
+    }]
 });
 
-module.exports = mongoose.model('Item', itemSchema ,'Item');
+module.exports = mongoose.model('Item', itemSchema, 'Item');
