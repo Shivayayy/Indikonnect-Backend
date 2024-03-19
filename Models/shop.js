@@ -27,7 +27,7 @@ const shopSchema = new mongoose.Schema({
     },
     image: {
         type: Buffer,
-        required: true
+        //required: true
     }
 });
 
