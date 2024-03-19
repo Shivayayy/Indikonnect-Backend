@@ -54,4 +54,4 @@ const createShop = async (req, res) => {
 };
 
 //Export both createShop function and uploads middleware
-module.exports = { createShop, uploads };
+module.exports = { createShop };

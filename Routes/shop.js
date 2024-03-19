@@ -8,7 +8,7 @@ const { validateShopCreation, shopValidation } = require('../MiddleWare/validati
 router.post(
     '/create-shop',
     isAuth,
-    uploads.single('shopImage'),
+    //uploads.single('shopImage'),
     validateShopCreation,
     shopValidation,
     createShop
