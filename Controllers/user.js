@@ -13,9 +13,11 @@ exports.createUser = async (req, res) => {
     });
 
     await newUser.save();
-    const token =jwt.sign({userID: user.id},process.env.JWT_SECRET,{expiresIn:'1d'})
-    // If user is found and password matches, send user details along with success message
-    res.status(200).json({ success: true, message: 'Signed-In successfully',user,token});
+    const user = newUser.toObject();
+    const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+    // Send the response with the token and user details
+    res.status(201).json({ token, user });
   } catch (error) {
     if (error.code === 11000) {
       if (error.keyPattern && error.keyPattern.UserName) {
@@ -29,6 +31,7 @@ exports.createUser = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 exports.userSignIn = async (req, res) => {
     const { UserName, Password } = req.body;
