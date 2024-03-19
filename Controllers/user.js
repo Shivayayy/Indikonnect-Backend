@@ -14,7 +14,7 @@ exports.createUser = async (req, res) => {
 
     await newUser.save();
     const user = newUser.toObject();
-    const token = jwt.sign({ userID: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ UserName: user.UserName }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
     // Send the response with the token and user details
     res.status(201).json({ token, user });
@@ -44,7 +44,7 @@ exports.userSignIn = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ success: false, message: 'Email/Password is incorrect' });
         }
-        const token =jwt.sign({userID: user.id},process.env.JWT_SECRET,{expiresIn:'1d'})
+        const token =jwt.sign({UserName: user.UserName},process.env.JWT_SECRET,{expiresIn:'1d'})
         // If user is found and password matches, send user details along with success message
         res.status(200).json({ success: true, message: 'Signed-In successfully',user,token});
     } catch (error) {
