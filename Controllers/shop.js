@@ -2,34 +2,34 @@ const Shop = require('../Models/shop');
 const multer = require('multer');
 const sharp = require('sharp');
 
-// Define storage and file filter for Multer
-const storage = multer.memoryStorage();
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image')) {
-        cb(null, true);
-    } else {
-        cb(new Error('Invalid image file!'), false);
-    }
-};
+// // Define storage and file filter for Multer
+// const storage = multer.memoryStorage();
+// const fileFilter = (req, file, cb) => {
+//     if (file.mimetype.startsWith('image')) {
+//         cb(null, true);
+//     } else {
+//         cb(new Error('Invalid image file!'), false);
+//     }
+// };
 
-// Initialize Multer with storage and file filter
-const uploads = multer({ storage: storage, fileFilter: fileFilter });
+// // Initialize Multer with storage and file filter
+// const uploads = multer({ storage: storage, fileFilter: fileFilter });
 
 const createShop = async (req, res) => {
     try {
         const { shopName, address ,latitude,longitude} = req.body;
         
-        // Ensure that a file is uploaded
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Image file is required' });
-        }
+        // // Ensure that a file is uploaded
+        // if (!req.file) {
+        //     return res.status(400).json({ success: false, message: 'Image file is required' });
+        // }
 
-        // Extract the image buffer from the request file
-        const profileBuffer = req.file.buffer;
-        const resizedImageBuffer = await sharp(profileBuffer)
-            .resize({ width: 500, height: 500 })
-            .jpeg({ quality: 80 })
-            .toBuffer();
+        // // Extract the image buffer from the request file
+        // const profileBuffer = req.file.buffer;
+        // const resizedImageBuffer = await sharp(profileBuffer)
+        //     .resize({ width: 500, height: 500 })
+        //     .jpeg({ quality: 80 })
+        //     .toBuffer();
         
         // Create a new Shop object with the processed image
         const newShop = new Shop({
@@ -40,7 +40,7 @@ const createShop = async (req, res) => {
                 type: 'Point',
                 coordinates: [longitude,latitude]
             },
-            image: resizedImageBuffer
+            //image: resizedImageBuffer
         });
         
         // Save the new shop to the database
