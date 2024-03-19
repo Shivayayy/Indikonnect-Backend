@@ -35,11 +35,9 @@ const itemSchema = new mongoose.Schema({
     reviews: [{
         rating: {
             type: Number,
-            required: true
         },
         comment: {
             type: String,
-            required: true
         }
     }]
 });
