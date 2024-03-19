@@ -22,7 +22,7 @@ const itemSchema = new mongoose.Schema({
             type: String,
             enum: ['g', 'kg'],
             required: true
-        }
+        },
     }],
     category: {
         type: String,

@@ -11,6 +11,7 @@ const {searchProduct,autoUpdate } = require('../Controllers/shopItem');
 router.post(
     '/search-product',
     searchProduct,
+    
 )
 
 router.post(

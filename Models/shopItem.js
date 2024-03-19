@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ShopitemSchema = new mongoose.Schema({
+const shopItemSchema = new mongoose.Schema({
 
     itemId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -12,25 +12,16 @@ const ShopitemSchema = new mongoose.Schema({
         ref: 'Shop',
         required: true
     },
-    variants: [{
-        price: {
+    variantQuantity: [{
+        variantId: {
             type: Number,
             required: true
         },
-        netWeight: {
+        quantity: {
             type: Number,
             required: true
         },
-        unit: {
-            type: String,
-            enum: ['g', 'kg'],
-            required: true
-        },
-        quantity :{
-            type :Number,
-            required :true,
-        }
     }],
 });
 
-module.exports = mongoose.model('shopItem', ShopitemSchema, 'shopItem');
+module.exports = mongoose.model('shopItem', shopItemSchema, 'shopItem');

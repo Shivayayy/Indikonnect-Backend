@@ -1,7 +1,7 @@
 const { check, validationResult } = require('express-validator');
 
 exports.validateShopCreation = [
-    check('shopName').trim().not().isEmpty().withMessage('Shop Name cannot be empty').isLength({ min: 3, max: 20 }).withMessage('Shop owner name must be 3 to 20 characters long!'),
+    check('shopName').trim().not().isEmpty().withMessage('Shop Name cannot be empty').isLength({ min: 3, max: 20 }).withMessage('Shop name must be 3 to 20 characters long!'),
     check('address').trim().not().isEmpty().withMessage('Address cannot be empty'),
     // check('image').custom((value, { req }) => {
     //     if (!req.file || !req.file.buffer || req.file.buffer.length === 0) {

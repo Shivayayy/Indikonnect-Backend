@@ -28,9 +28,6 @@ const searchProduct = async (req, res, next) => {
 
 const autoUpdate = async (req, res) => {
     try {
-        if (!req.body.productFound) {
-            return res.status(501).json({ message: 'Product not found, add product' });
-        }
 
         const { quantity, price, itemId } = req.body;
         const ownerId = req.user._id;
@@ -49,33 +46,56 @@ const autoUpdate = async (req, res) => {
             return res.status(404).json({ message: 'Product not found in the database' });
         }
 
-        console.log('Found Product:', foundProduct); // Log the found product
+        //console.log('Found Product:', foundProduct); // Log the found product
 
-        const priceIndex = foundProduct.prices.findIndex(p => p.amount === price);
-        console.log(priceIndex);
-
+        let priceIndex = -1;
+        for (let i = 0; i < foundProduct.variants.length; i++) {
+            if (foundProduct.variants[i].price === price) {
+                priceIndex = i;
+                break;
+            }
+        }
         if (priceIndex === -1) {
             return res.status(404).json({ message: 'Price not found for the product' });
         }
-
-        const netWeight = foundProduct.netWeight.value;
-        const unit = foundProduct.netWeight.unit;
-
-        // Create a new shopItem
-        const newShopItem = new shopItem({
-            shopId: shop._id,
-            itemName: foundProduct.itemName,
-            description: foundProduct.description,
-            price: price,
-            quantity: quantity,
-            netWeight: 10,
-            unit: 1,
-            category: foundProduct.category,
-            imageUrl: foundProduct.imageUrl
-        });
-
-        // Save the new shopItem to the database
-        await newShopItem.save();
+        console.log(`Index found at ${priceIndex}`)
+        const foundShopItem =await shopItem.findOne({itemId:itemId});
+        if(!foundShopItem)
+        {
+            console.log('item not already in shop')
+            console.log
+            const newShopItem =new shopItem({
+                itemId :itemId,
+                shopId :shop._id,
+                variantQuantity :[
+                    {
+                        variantId : priceIndex,
+                        quantity : quantity,
+                    }
+                ]
+            })
+            await newShopItem.save();
+        }
+        else 
+        {
+            const variantIndex = foundShopItem.variantQuantity.findIndex(variantQuantity => variantQuantity.variantId === priceIndex);
+            if(variantIndex === -1) 
+            {
+                console.log('variant not already in shop')
+                foundShopItem.variantQuantity.push(
+                {
+                    variantId: priceIndex,
+                    quantity: quantity
+                });
+                await foundShopItem.save();
+            }
+            else 
+            {
+                const val =foundShopItem.variantQuantity[variantIndex].quantity;
+                foundShopItem.variantQuantity[variantIndex].quantity = val + quantity;
+                await foundShopItem.save();
+            }
+        }
 
         res.status(200).json({ message: 'Shop item created successfully' });
     } catch (error) {
@@ -83,11 +103,6 @@ const autoUpdate = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
-
-
-
-
 
 module.exports = {searchProduct,autoUpdate};
 
