@@ -17,6 +17,7 @@ const sharp = require('sharp');
 
 const createShop = async (req, res) => {
     try {
+        
         const { shopName, address ,latitude,longitude} = req.body;
         
         // // Ensure that a file is uploaded

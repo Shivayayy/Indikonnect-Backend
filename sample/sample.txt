@@ -1,0 +1,33 @@
+user
+
+{
+    "UserName" : "testShopkeeper",
+    "Email" : "Shopkeeper@test.com",
+    "Password" : "shop@pass",
+    "Role" : "shopkeeper"
+}
+
+shop 
+
+{
+    "shopName": "SampleShop",
+    "address": "123 Sample Address",
+    "longitude": 91.562130,
+    "latitude": 26.081950
+}
+
+
+shopItem 
+
+{
+    "quantity": 5,
+    "price": 2,
+    "itemId": "65f95bce3dde2c8a769bf0f4" 
+}
+
+shopNearBy 
+
+{
+    "longitude": 91.562130,
+    "latitude": 26.081950
+}
