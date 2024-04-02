@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { isAuth } = require('../MiddleWare/auth');
 
-const { searchProduct, autoUpdate, manualUpdate, updateVariant } = require('../Controllers/shopItem');
+const { searchProduct, autoUpdate, manualUpdate, updateVariant } = require('../Controllers/ShopItem.js');
 const {
     validateSearchProduct,
     validateAutoUpdate,

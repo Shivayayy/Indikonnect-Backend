@@ -31,3 +31,18 @@ shopNearBy
     "longitude": 91.562130,
     "latitude": 26.081950
 }
+
+onTappingShop 
+
+{
+    "shopId" : "65fa06654bcab88c654c8447"
+}
+
+searchProducts 
+
+{
+    "itemName": "Fresh"
+}
+
+
+
