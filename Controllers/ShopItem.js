@@ -7,6 +7,9 @@ const Shop = require('../Models/shop');
 const searchProduct = async (req, res, next) => {
     try {
         const { itemName } = req.body; 
+        if (!itemName || itemName.trim().length === 0) {
+            return res.status(400).json({ message: "Please provide a product name to search." });
+        }
         const regex = new RegExp(itemName, 'i');
         const products = await Item.find({ itemName: { $regex: regex } });
 
