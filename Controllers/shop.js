@@ -21,16 +21,16 @@ const createShop = async (req, res) => {
         const { shopName, address ,latitude,longitude} = req.body;
         
         // Ensure that a file is uploaded
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'Image file is required' });
-        }
+        // if (!req.file) {
+        //     return res.status(400).json({ success: false, message: 'Image file is required' });
+        // }
 
         // Extract the image buffer from the request file
-        const profileBuffer = req.file.buffer;
-        const resizedImageBuffer = await sharp(profileBuffer)
-            .resize({ width: 500, height: 500 })
-            .jpeg({ quality: 80 })
-            .toBuffer();
+        //const profileBuffer = req.file.buffer;
+        // const resizedImageBuffer = await sharp(profileBuffer)
+        //     .resize({ width: 500, height: 500 })
+        //     .jpeg({ quality: 80 })
+        //     .toBuffer();
         
         //Create a new Shop object with the processed image
         const newShop = new Shop({

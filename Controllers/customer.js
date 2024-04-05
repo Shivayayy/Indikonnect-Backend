@@ -33,7 +33,7 @@ const shopsNearBy = async (req, res) => {
                 }
             }
         ]);
-
+        console.log(nearbyShops)
         // Fetch owner names and top three categories for each nearby shop
         const nearbyShopsWithOwnerNamesAndTopCategories = await Promise.all(nearbyShops.map(async (shop) => {
             const owner = await User.findById(shop.owner);
@@ -55,9 +55,14 @@ const shopsNearBy = async (req, res) => {
             const sortedCategories = Object.keys(categoryCount).sort((a, b) => categoryCount[b] - categoryCount[a]);
             const topThreeCategories = sortedCategories.slice(0, 3);
 
+            const items = await Promise.all(shopItems.map(async (shopItem) => {
+                const item = await Item.findById(shopItem.itemId);
+                return item;
+            }));
             return {
                 shop: shop,
-                distance: shop.distance,
+                itemList :items,
+                distance: Math.floor(shop.distance),
                 ownerUserName: owner ? owner.UserName : 'Unknown',
                 topCategories: topThreeCategories
             };
@@ -69,5 +74,5 @@ const shopsNearBy = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 };
-
 module.exports = { userInfo, shopsNearBy };
+
