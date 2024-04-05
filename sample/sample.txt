@@ -44,5 +44,21 @@ searchProducts
     "itemName": "Fresh"
 }
 
+createOrder
+
+{
+    "location": {
+        "coordinates": [91.565728, 26.082592]
+    },
+    "items": [
+        {
+            "itemId": "65f95bce3dde2c8a769bf0f4",
+            "price": 2,  
+            "quantity": 10 
+        }
+    ]
+}
+
+
 
 
