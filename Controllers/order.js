@@ -1,52 +1,154 @@
 const mongoose = require('mongoose');
-
 const Order = require('../Models/order');
+const Shop = require('../Models/shop'); 
 
 const createOrder = async (req, res) => {
-    console.log(req.body);
-  
-    try {
-      const { items, location } = req.body;
-  
-      const orderItems = [];
-      let total = 0;
-  
-      for (const item of items) {
-        const { itemId, price, quantity } = item;
-  
-        // Ensure that itemId is converted to ObjectId correctly
-        const validItemId = new mongoose.Types.ObjectId(itemId);
-  
-        // Validate that price and quantity are provided
-        if (!price || !quantity) {
-          return res.status(400).json({ error: 'Price and quantity are required for each item' });
-        }
-  
-        // Calculate total price for the current item
-        const totalPriceForItem = price * quantity;
-        total += totalPriceForItem;
-  
-        orderItems.push({
-          itemId: validItemId,
-          price,
-          quantity
-        });
+  try {
+    const { validatedItems, location, shopId } = req.body;
+    const items = validatedItems;
+    const orderItems = [];
+    let total = 0;
+
+    for (const item of items) {
+      const { itemId, price, quantity, variantId } = item;
+
+      // Ensure that itemId is converted to ObjectId correctly
+      const validItemId = new mongoose.Types.ObjectId(itemId);
+      if (!price || !quantity) {
+        return res.status(400).json({ error: 'Price and quantity are required for each item' });
       }
-  
-      const newOrder = new Order({
-        items: orderItems,
-        total,
-        location,
-        status: 'pending'
+
+      // Calculate total price for the current item
+      const totalPriceForItem = price * quantity;
+      total += totalPriceForItem;
+
+      orderItems.push({
+        variantId,
+        itemId: validItemId,
+        price,
+        quantity,
+       
       });
-  
-      await newOrder.save();
-  
-      return res.status(201).json({ message: 'Order created successfully, waiting for shopKeeper response', orderId: newOrder._id });
-    } catch (error) {
-      console.error('Error processing order:', error);
-      return res.status(500).json({ error: 'Internal Server Error' });
     }
-  };
-  
-  module.exports = { createOrder };
+
+    const newOrder = new Order({
+      customerId: req.user._id,
+      shopId,
+      items: orderItems,
+      total,
+      location,
+      status: 'pending',
+    });
+
+    await newOrder.save();
+
+    return res.status(201).json({
+      message: 'Order created successfully, waiting for shopKeeper response',
+      orderId: newOrder._id,
+    });
+  } catch (error) {
+    console.error('Error processing order:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const allOrderShopkeeper = async (req, res) => {
+  try {
+    const { status } = req.query; // Get the status from the query parameters
+
+    // Find the shopId for the given shopkeeper
+    const shop = await Shop.findOne({ owner: req.user._id });
+    if (!shop) {
+      return res.status(404).json({ error: 'Shopkeeper not found' });
+    }
+
+    // Query the Order database for all orders with the shopId and the specified status
+    const orders = await Order.find({
+      shopId: shop._id,
+      status: status || { $in: ['pending', 'in-transaction','Out for delivery', 'completed','rejected'] },
+    });
+
+    if (orders.length === 0) {
+      return res.status(200).json({ message: 'No orders found' });
+    }
+
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const processOrder = async (req, res) => {
+  try {
+    const { status, orderId } = req.body;
+    const order = await Order.findOne({ _id: orderId });
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+    if (status === 'reject') {
+      order.status = 'rejected';
+      await order.save();
+      return res.status(200).json({ message: 'Pick-Up from Shop' });
+    } 
+    else if (status === 'accept') {
+
+      if (order.status !== 'pending') {
+        return res.status(400).json({ message: order.status });
+      }
+
+      // Get shopkeeper's location
+      const shopkeeper = await Shop.findOne({ owner: req.user._id });
+      if (!shopkeeper) {
+        return res.status(404).json({ error: 'Shopkeeper not found' });
+      }
+      const shopkeeperLocation = shopkeeper.location.coordinates;
+
+      // Get customer's location from the order
+      const customerLocation = order.location.coordinates;
+
+      // Calculate distance between shopkeeper and customer
+      const distanceInKm = calculateDistance(shopkeeperLocation, customerLocation);
+      const distanceInM = Math.floor(distanceInKm * 1000);
+      const deliveryChargePerKm = 5.75;
+      const deliveryCharge = Math.floor(distanceInKm * deliveryChargePerKm);
+      const totalWithDeliveryCharge = order.total + deliveryCharge;
+
+      // Update the order total with delivery charge and change status to "In Transit"
+      order.total = totalWithDeliveryCharge;
+      order.status = 'processing';
+      await order.save();
+
+      return res.status(200).json({ deliveryCharge, totalWithDeliveryCharge, distanceInM });
+    }
+  } catch (error) {
+    console.error('Error processing order:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+function calculateDistance(coord1, coord2) {
+  const lat1 = coord1[1];
+  const lon1 = coord1[0];
+  const lat2 = coord2[1];
+  const lon2 = coord2[0];
+  const R = 6371; // Radius of the Earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+  return distance;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+
+
+
+module.exports = { createOrder,allOrderShopkeeper,processOrder };

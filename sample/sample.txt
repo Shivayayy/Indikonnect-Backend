@@ -47,6 +47,7 @@ searchProducts
 createOrder
 
 {
+    "shopId" :"65fa06654bcab88c654c8447",
     "location": {
         "coordinates": [91.565728, 26.082592]
     },
@@ -54,11 +55,15 @@ createOrder
         {
             "itemId": "65f95bce3dde2c8a769bf0f4",
             "price": 2,  
-            "quantity": 10 
+            "quantity": 9 
         }
     ]
+
 }
 
+allOrderShopkeeper
+
+http://localhost:8000/allOrderShopkeeper?status=pending
 
 
 
