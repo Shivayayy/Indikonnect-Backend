@@ -130,12 +130,14 @@ const manualUpdate = async (req, res) => {
 
         req.body.itemId = newItemId; 
         await autoUpdate(req, res); 
-
-        res.status(200).json({ message: 'Shop item manually updated successfully' });
+        return; res.status(200).json({ message: 'Shop item manually updated successfully' });
+        
+        //next();
 
     } catch (error) {
         console.error('Error in manually updating shop item:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ message: 'Internal server error' });
+       
     }
 };
 
