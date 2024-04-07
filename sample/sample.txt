@@ -44,6 +44,17 @@ searchProducts
     "itemName": "Fresh"
 }
 
+manual Update
+{
+    "itemName": "Peaches",
+    "description": "Fresh, crunchy peaches sourced from local orchards.",
+    "price": 2.19,
+    "netWeight": 1.5,
+    "unit": "kg",
+    "category": "Fruits",
+    "quantity": 70
+}
+
 createOrder
 
 {

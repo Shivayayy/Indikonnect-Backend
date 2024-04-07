@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Order = require('../Models/order');
 const Shop = require('../Models/shop'); 
+const shopItemSchema = require('../Models/shopItem');
 
 const createOrder = async (req, res) => {
   try {
@@ -54,7 +55,7 @@ const createOrder = async (req, res) => {
 
 const allOrderShopkeeper = async (req, res) => {
   try {
-    const { status } = req.query; // Get the status from the query parameters
+    const { status } = req.params; // Get the status from the query parameters
 
     // Find the shopId for the given shopkeeper
     const shop = await Shop.findOne({ owner: req.user._id });
@@ -127,6 +128,44 @@ const processOrder = async (req, res) => {
   }
 };
 
+const updateInventory = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    // Check if orderId is provided
+    if (!orderId) {
+      return res.status(404).json({ message: `Order with orderId ${orderId} not found` });
+    }
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: `Order with orderId ${orderId} not found` });
+    }
+    if (order.status !== 'paid') {
+      return res.status(200).json({ message: 'Inventory already up to date' });
+    }
+
+    for (const item of order.items) {
+      
+      const shopItem = await shopItemSchema.findOne({ itemId: item.itemId });
+      if (shopItem) {
+        const variant = shopItem.variantQuantity.find(v => v.variantId === item.variantId);
+        if (variant) {
+          variant.quantity -= item.quantity;
+        }
+        await shopItem.save();
+      }
+    }
+    order.status ='outForDelivery';
+    await order.save();
+
+    return res.status(200).json({ message: 'Inventory updated successfully' });
+  } catch (error) {
+    console.error('Fatal error :inventory not updated:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 
 function calculateDistance(coord1, coord2) {
   const lat1 = coord1[1];
@@ -151,4 +190,4 @@ function deg2rad(deg) {
 
 
 
-module.exports = { createOrder,allOrderShopkeeper,processOrder };
+module.exports = { createOrder,allOrderShopkeeper,processOrder,updateInventory };

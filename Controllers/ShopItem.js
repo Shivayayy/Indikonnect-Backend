@@ -130,7 +130,7 @@ const manualUpdate = async (req, res) => {
 
         req.body.itemId = newItemId; 
         await autoUpdate(req, res); 
-        return; res.status(200).json({ message: 'Shop item manually updated successfully' });
+        return; //res.status(200).json({ message: 'Shop item manually updated successfully' });
         
         //next();
 
