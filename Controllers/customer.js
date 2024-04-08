@@ -64,7 +64,8 @@ const shopsNearBy = async (req, res) => {
                 itemList :items,
                 distance: Math.floor(shop.distance),
                 ownerUserName: owner ? owner.UserName : 'Unknown',
-                topCategories: topThreeCategories
+                topCategories: topThreeCategories,
+                sortedCategories :sortedCategories
             };
         }));
 
