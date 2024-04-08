@@ -114,7 +114,7 @@ const specificOrderShopkeeper = async (req, res) => {
     });
 
     if (orders.length === 0) {
-      return res.status(200).json({ message: 'No orders found' });
+      return res.status(200).json({ message: 'No orders found'});
     }
 
     // Fetch customer names and addresses for each order
@@ -134,7 +134,6 @@ const specificOrderShopkeeper = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 const allOrderShopkeeper = async (req, res) => {
   try {
@@ -161,10 +160,17 @@ const allOrderShopkeeper = async (req, res) => {
       paid: []
     };
 
-    // Categorize orders based on status
-    orders.forEach(order => {
-      ordersByStatus[order.status].push(order);
-    });
+    // Categorize orders based on status and fetch customer names and addresses
+    await Promise.all(orders.map(async order => {
+      const customer = await User.findById(order.customerId);
+      const address = await getReverseGeocode(order.location.coordinates[1], order.location.coordinates[0]);
+      const orderWithDetails = {
+        ...order.toObject(),
+        customerName: customer ? customer.UserName : 'Unknown',
+        address: address // Address obtained from reverse geocoding
+      };
+      ordersByStatus[order.status].push(orderWithDetails);
+    }));
 
     return res.status(200).json(ordersByStatus);
   } catch (error) {

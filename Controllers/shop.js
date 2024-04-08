@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { google } = require('googleapis');
 
+//There was a branch merge just for the safety we are doing this
 // Multer configuration
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -70,7 +71,6 @@ async function uploadFileToDrive(authClient, filePath, fileName) {
 
   return imageUrl;
 }
-
 // Function to create a new shop
 const createShop = async (req, res) => {
   try {
