@@ -50,7 +50,7 @@ async function uploadFileToDrive(authClient, filePath, fileName) {
   const response = await drive.files.create({
     resource: fileMetadata,
     media: media,
-    fields: 'id, webViewLink',
+    fields: 'id',
   });
 
   // Set the file permissions to "anyone with the link can view"
@@ -62,18 +62,23 @@ async function uploadFileToDrive(authClient, filePath, fileName) {
     },
   });
 
-  return response.data.webViewLink;
-}
+  // Extract the file ID from the response
+  const fileId = response.data.id;
 
+  // Construct the final URL
+  const imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+
+  return imageUrl;
+}
 
 // Function to create a new shop
 const createShop = async (req, res) => {
   try {
     const { shopName, address, latitude, longitude ,path,originalname} = req.body;
 
-
+    
     const authClient = await authorize();
-    const imageUrl = await uploadFileToDrive(authClient, path,originalname);
+    const imageUrl = await uploadFileToDrive(authClient, req.file.path, req.file.originalname);
 
     const newShop = new Shop({
       shopName: shopName,
