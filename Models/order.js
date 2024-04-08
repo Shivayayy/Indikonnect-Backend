@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    shopId :{
+    shopId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Item',
         required: true
     },
-    customerId :{type: mongoose.Schema.Types.ObjectId,
+    customerId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Item',
         required: true
     },
@@ -20,16 +21,28 @@ const orderSchema = new mongoose.Schema({
             type: Number,
             required: true
         },
-        price : {
-            type :Number,
+        price: {
+            type: Number,
             required: true
         },
-        variantId:{
-            type :Number,
-            required :true,
+        variantId: {
+            type: Number,
+            required: true,
+        },
+        itemName :{
+            type:String,
+            required:true,
         }
     }],
     total: {
+        type: Number,
+        required: true
+    },
+    deliveryCharge: {
+        type: Number,
+        required: true
+    },
+    serviceCharge: {
         type: Number,
         required: true
     },
@@ -45,9 +58,15 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'processing', 'completed','rejected','outForDelivery','paid'],
+        enum: ['pending', 'processing', 'completed', 'rejected', 'outForDelivery', 'paid'],
         default: 'pending'
     }
+});
+
+// Define a virtual property for GrandTotal
+orderSchema.virtual('grandTotal').get(function() {
+    // Calculate GrandTotal as the sum of Total, DeliveryCharge, and ServiceCharge
+    return this.total + this.deliveryCharge + this.serviceCharge;
 });
 
 orderSchema.index({ location: "2dsphere" }); // Index for geospatial query

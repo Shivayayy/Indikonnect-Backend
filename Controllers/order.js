@@ -13,13 +13,17 @@ const createOrder = async (req, res) => {
 
     for (const item of items) {
       const { itemId, price, quantity, variantId } = item;
+      
 
       // Ensure that itemId is converted to ObjectId correctly
       const validItemId = new mongoose.Types.ObjectId(itemId);
       if (!price || !quantity) {
         return res.status(400).json({ error: 'Price and quantity are required for each item' });
       }
-
+      const fetchedItem = await Item.findById(validItemId);
+      if (!fetchedItem) {
+        return res.status(404).json({ error: `Item with ID ${itemId} not found` });
+      }
       // Calculate total price for the current item
       const totalPriceForItem = price * quantity;
       total += totalPriceForItem;
@@ -27,17 +31,41 @@ const createOrder = async (req, res) => {
       orderItems.push({
         variantId,
         itemId: validItemId,
+        itemName: fetchedItem.itemName,
         price,
         quantity,
-       
       });
     }
+
+    const shopkeeper = await Shop.findOne({ owner: req.user._id });
+    if (!shopkeeper) {
+      return res.status(404).json({ error: 'Shopkeeper not found' });
+    }
+    
+    const shopkeeperLocation = shopkeeper.location.coordinates;
+    const customerLocation = location.coordinates;
+    const distanceInKm = calculateDistance(shopkeeperLocation, customerLocation);
+    
+    if (isNaN(distanceInKm)) {
+      return res.status(400).json({ error: 'Invalid distance calculation' });
+    }
+    
+    const deliveryChargePerKm = 5.75;
+    const deliveryCharge = (distanceInKm * deliveryChargePerKm).toFixed(2); // Round off to two decimal points
+    
+    if (isNaN(deliveryCharge)) {
+      return res.status(400).json({ error: 'Invalid delivery charge calculation' });
+    }
+    
+    const serviceCharge = 2.00;
 
     const newOrder = new Order({
       customerId: req.user._id,
       shopId,
       items: orderItems,
       total,
+      deliveryCharge,
+      serviceCharge,
       location,
       status: 'pending',
     });
@@ -54,6 +82,7 @@ const createOrder = async (req, res) => {
   }
 };
 
+
 const axios = require('axios');
 
 async function getReverseGeocode(latitude, longitude) {
@@ -67,7 +96,7 @@ async function getReverseGeocode(latitude, longitude) {
     }
 }
 
-const allOrderShopkeeper = async (req, res) => {
+const specificOrderShopkeeper = async (req, res) => {
   try {
     const { status } = req.params; // Get the status from the query parameters
 
@@ -106,6 +135,42 @@ const allOrderShopkeeper = async (req, res) => {
 };
 
 
+const allOrderShopkeeper = async (req, res) => {
+  try {
+    // Find the shopId for the given shopkeeper
+    const shop = await Shop.findOne({ owner: req.user._id });
+    if (!shop) {
+      return res.status(404).json({ error: 'Shopkeeper not found' });
+    }
+
+    // Query all orders for the shopId
+    const orders = await Order.find({ shopId: shop._id });
+
+    if (orders.length === 0) {
+      return res.status(200).json({ message: 'No orders found' });
+    }
+
+    // Initialize arrays for each status
+    const ordersByStatus = {
+      pending: [],
+      processing: [],
+      completed: [],
+      rejected: [],
+      outForDelivery: [],
+      paid: []
+    };
+
+    // Categorize orders based on status
+    orders.forEach(order => {
+      ordersByStatus[order.status].push(order);
+    });
+
+    return res.status(200).json(ordersByStatus);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 const processOrder = async (req, res) => {
@@ -131,20 +196,6 @@ const processOrder = async (req, res) => {
       if (!shopkeeper) {
         return res.status(404).json({ error: 'Shopkeeper not found' });
       }
-      const shopkeeperLocation = shopkeeper.location.coordinates;
-
-      // Get customer's location from the order
-      const customerLocation = order.location.coordinates;
-
-      // Calculate distance between shopkeeper and customer
-      const distanceInKm = calculateDistance(shopkeeperLocation, customerLocation);
-      const distanceInM = Math.floor(distanceInKm * 1000);
-      const deliveryChargePerKm = 5.75;
-      const deliveryCharge = Math.floor(distanceInKm * deliveryChargePerKm);
-      const totalWithDeliveryCharge = order.total + deliveryCharge;
-
-      // Update the order total with delivery charge and change status to "In Transit"
-      order.total = totalWithDeliveryCharge;
       order.status = 'processing';
       await order.save();
 
@@ -219,4 +270,4 @@ function deg2rad(deg) {
 
 
 
-module.exports = { createOrder,allOrderShopkeeper,processOrder,updateInventory };
+module.exports = { createOrder,allOrderShopkeeper,processOrder,updateInventory ,specificOrderShopkeeper};
