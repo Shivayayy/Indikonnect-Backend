@@ -156,6 +156,7 @@ const processOrder = async (req, res) => {
   }
 };
 
+
 const updateInventory = async (req, res) => {
   try {
     const { orderId } = req.params;

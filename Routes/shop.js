@@ -2,15 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { createShop, uploads } = require('../Controllers/shop');
 const { isAuth } = require('../MiddleWare/auth');
-const { validateShopCreation, shopValidation } = require('../MiddleWare/validation/shop'); 
 
-// Route for creating a new shop
+// Route for creating a new shop with image upload to Google Drive
 router.post(
     '/create-shop',
     isAuth,
-    //uploads.single('shopImage'),
-    validateShopCreation,
-    shopValidation,
+    uploads.single('image'), // Middleware for handling image upload
     createShop
 );
 

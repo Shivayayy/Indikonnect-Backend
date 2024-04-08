@@ -1,58 +1,102 @@
 const Shop = require('../Models/shop');
 const multer = require('multer');
-const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
+const { google } = require('googleapis');
 
-// Define storage and file filter for Multer
-const storage = multer.memoryStorage();
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image')) {
-        cb(null, true);
-    } else {
-        cb(new Error('Invalid image file!'), false);
-    }
-};
+// Multer configuration
+const uploadDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// Initialize Multer with storage and file filter
-const uploads = multer({ storage: storage, fileFilter: fileFilter });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
 
+const uploads = multer({ storage: storage });
+
+// Google Drive API configuration
+const apikeys = require('../credentials.json');
+const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+
+// Function to authorize and get access to Google Drive API
+async function authorize() {
+  const authClient = new google.auth.JWT(
+    apikeys.client_email,
+    null,
+    apikeys.private_key,
+    SCOPES
+  );
+  await authClient.authorize();
+  return authClient;
+}
+
+// Function to upload file to Google Drive
+async function uploadFileToDrive(authClient, filePath, fileName) {
+  const drive = google.drive({ version: 'v3', auth: authClient });
+
+  // Upload the file to Google Drive
+  const fileMetadata = { name: fileName };
+  const media = {
+    mimeType: 'image/jpeg',
+    body: require('fs').createReadStream(filePath),
+  };
+  const response = await drive.files.create({
+    resource: fileMetadata,
+    media: media,
+    fields: 'id, webViewLink',
+  });
+
+  // Set the file permissions to "anyone with the link can view"
+  await drive.permissions.create({
+    fileId: response.data.id,
+    requestBody: {
+      role: 'reader',
+      type: 'anyone',
+    },
+  });
+
+  return response.data.webViewLink;
+}
+
+
+// Function to create a new shop
 const createShop = async (req, res) => {
-    try {
-        
-        const { shopName, address ,latitude,longitude} = req.body;
-        
-        // Ensure that a file is uploaded
-        // if (!req.file) {
-        //     return res.status(400).json({ success: false, message: 'Image file is required' });
-        // }
-
-        // Extract the image buffer from the request file
-        //const profileBuffer = req.file.buffer;
-        // const resizedImageBuffer = await sharp(profileBuffer)
-        //     .resize({ width: 500, height: 500 })
-        //     .jpeg({ quality: 80 })
-        //     .toBuffer();
-        
-        //Create a new Shop object with the processed image
-        const newShop = new Shop({
-            shopName: shopName,
-            owner: req.user._id,
-            address: address,
-            location: {
-                type: 'Point',
-                coordinates: [longitude,latitude]
-            },
-            //image: resizedImageBuffer
-        });
-        
-        // Save the new shop to the database
-        const savedShop = await newShop.save();
-        
-        res.status(201).json({ success: true, message: 'Shop created successfully', shop: savedShop });
-    } catch (error) {
-        console.error('Error creating shop:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+  try {
+    const { shopName, address, latitude, longitude } = req.body;
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Image file is required' });
     }
+
+    const authClient = await authorize();
+    const imageUrl = await uploadFileToDrive(authClient, req.file.path, req.file.originalname);
+
+    const newShop = new Shop({
+      shopName: shopName,
+      owner: req.user._id,
+      address: address,
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      },
+      image: imageUrl,
+    });
+
+    const savedShop = await newShop.save();
+    res.status(201).json({ success: true, message: 'Shop created successfully', shop: savedShop });
+  } catch (error) {
+    console.error('Error creating shop:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };
 
-//Export both createShop function and uploads middleware
-module.exports = { createShop };
+module.exports = {
+  createShop,
+  uploads,
+};
