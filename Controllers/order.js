@@ -117,14 +117,25 @@ const specificOrderShopkeeper = async (req, res) => {
       return res.status(200).json({ message: 'No orders found'});
     }
 
-    // Fetch customer names and addresses for each order
+    // Fetch customer names, addresses, and item names for each order
     const ordersWithDetails = await Promise.all(orders.map(async order => {
       const customer = await User.findById(order.customerId);
       const address = await getReverseGeocode(order.location.coordinates[1], order.location.coordinates[0]);
+
+      // Populate the itemId field and select the itemName
+      const itemsWithNames = await Promise.all(order.items.map(async item => {
+        const { itemName } = await Item.findById(item.itemId, 'itemName');
+        return {
+          ...item.toObject(),
+          itemName
+        };
+      }));
+
       return {
         ...order.toObject(),
         customerName: customer ? customer.UserName : 'Unknown',
-        address: address // Address obtained from reverse geocoding
+        address: address, // Address obtained from reverse geocoding
+        items: itemsWithNames
       };
     }));
 
@@ -160,15 +171,26 @@ const allOrderShopkeeper = async (req, res) => {
       paid: []
     };
 
-    // Categorize orders based on status and fetch customer names and addresses
+    // Categorize orders based on status and fetch customer names, addresses, and item names
     await Promise.all(orders.map(async order => {
       const customer = await User.findById(order.customerId);
       const address = await getReverseGeocode(order.location.coordinates[1], order.location.coordinates[0]);
+
+      const itemsWithNames = await Promise.all(order.items.map(async item => {
+        const { itemName } = await Item.findById(item.itemId, 'itemName');
+        return {
+          ...item.toObject(),
+          itemName
+        };
+      }));
+
       const orderWithDetails = {
         ...order.toObject(),
         customerName: customer ? customer.UserName : 'Unknown',
-        address: address // Address obtained from reverse geocoding
+        address: address, // Address obtained from reverse geocoding
+        items: itemsWithNames
       };
+
       ordersByStatus[order.status].push(orderWithDetails);
     }));
 
@@ -178,6 +200,7 @@ const allOrderShopkeeper = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 const processOrder = async (req, res) => {
