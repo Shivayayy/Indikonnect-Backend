@@ -83,5 +83,19 @@ autoupdate
     "itemId" :"65f95bce3dde2c8a769bf0f6"
 }
 
+manualUpdate with an Image 
+{
+    "itemName": "Applesss",
+    "description": "Fresh red apples",
+    "price": 2.5,
+    "netWeight": 500,
+    "unit": "g",
+    "category": "Fruits",
+    "quantity": 10,
+    "path": "/Users/shivamdwivedi/Desktop/Academics/College/6th Sem/Software Enginnering/IndiConnect/Backend/Authentication/parleG.jpeg",
+    "originalname": "parleG.jpeg"
+}
+
+
 
 

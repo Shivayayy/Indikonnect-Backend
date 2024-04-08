@@ -105,10 +105,11 @@ const manualUpdate = async (req, res) => {
             originalname
         } = req.body;
 
-        // Validate that all required fields are provided
+       
         if (!itemName || !description || !price || !netWeight || !unit || !category || !quantity) {
             return res.status(400).json({ message: 'All fields are required' });
         }
+        //console.log(itemName,description,price,netWeight,unit,category,quantity,path,originalname)
         const foundShopItembyName = await shopItem.findOne({ itemName: itemName });
         if(foundShopItembyName)
         {
