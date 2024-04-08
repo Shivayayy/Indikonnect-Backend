@@ -54,6 +54,19 @@ const createOrder = async (req, res) => {
   }
 };
 
+const axios = require('axios');
+
+async function getReverseGeocode(latitude, longitude) {
+    try {
+        const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+        const { address } = response.data;
+        return address;
+    } catch (error) {
+        console.error('Error fetching reverse geocode:', error);
+        throw error;
+    }
+}
+
 const allOrderShopkeeper = async (req, res) => {
   try {
     const { status } = req.params; // Get the status from the query parameters
@@ -74,21 +87,24 @@ const allOrderShopkeeper = async (req, res) => {
       return res.status(200).json({ message: 'No orders found' });
     }
 
-    // Fetch customer names for each order
-    const ordersWithCustomerNames = await Promise.all(orders.map(async order => {
+    // Fetch customer names and addresses for each order
+    const ordersWithDetails = await Promise.all(orders.map(async order => {
       const customer = await User.findById(order.customerId);
+      const address = await getReverseGeocode(order.location.coordinates[1], order.location.coordinates[0]);
       return {
         ...order.toObject(),
-        customerName: customer ? customer.UserName : 'Unknown' // Replace 'Unknown' with a default value if customer is not found
+        customerName: customer ? customer.UserName : 'Unknown',
+        address: address // Address obtained from reverse geocoding
       };
     }));
 
-    return res.status(200).json(ordersWithCustomerNames);
+    return res.status(200).json(ordersWithDetails);
   } catch (error) {
     console.error('Error fetching orders:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 
