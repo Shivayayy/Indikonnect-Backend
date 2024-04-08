@@ -38,12 +38,12 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const shopkeeper = await Shop.findOne({ owner: req.user._id });
-    if (!shopkeeper) {
+    const shop = await Shop.findById(shopId);
+    if (!shop) {
       return res.status(404).json({ error: 'Shopkeeper not found' });
     }
     
-    const shopkeeperLocation = shopkeeper.location.coordinates;
+    const shopkeeperLocation = shop.location.coordinates;
     const customerLocation = location.coordinates;
     const distanceInKm = calculateDistance(shopkeeperLocation, customerLocation);
     

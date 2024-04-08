@@ -10,6 +10,7 @@ const customer =require('./Routes/customer');
 const order =require('./Routes/order');
 const shopkeeper =require('./Routes/shopkeeper')
 const notification =require('./Routes/notification')
+const paymentRoutes = require('./Routes/payment');
 const app = express();
 
 app.use(cors())
@@ -21,6 +22,7 @@ app.use(customer);
 app.use(order);
 app.use(shopkeeper);
 app.use(notification);
+app.use(paymentRoutes);
 
 
 app.listen(8000, () => {
