@@ -69,13 +69,13 @@ async function uploadFileToDrive(authClient, filePath, fileName) {
 // Function to create a new shop
 const createShop = async (req, res) => {
   try {
-    const { shopName, address, latitude, longitude } = req.body;
+    const { shopName, address, latitude, longitude ,path,originalname} = req.body;
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Image file is required' });
     }
-
+    console.log(req.file)
     const authClient = await authorize();
-    const imageUrl = await uploadFileToDrive(authClient, req.file.path, req.file.originalname);
+    const imageUrl = await uploadFileToDrive(authClient, path, originalname);
 
     const newShop = new Shop({
       shopName: shopName,

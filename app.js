@@ -9,6 +9,7 @@ const shopItemRouter =require('./Routes/shopItem');
 const customer =require('./Routes/customer');
 const order =require('./Routes/order');
 const shopkeeper =require('./Routes/shopkeeper')
+const notification =require('./Routes/notification')
 const app = express();
 
 app.use(cors())
@@ -19,6 +20,7 @@ app.use(shopItemRouter);
 app.use(customer);
 app.use(order);
 app.use(shopkeeper);
+app.use(notification);
 
 
 app.listen(8000, () => {
