@@ -1,5 +1,5 @@
 // controllers/shopItem.js
-
+const {authorize,uploadFileToDrive} =require('./fileUploader');
 const Item = require('../Models/item');
 const shopItem = require('../Models/shopItem');
 const Shop = require('../Models/shop');
@@ -101,6 +101,8 @@ const manualUpdate = async (req, res) => {
             unit,
             category,
             quantity,
+            path,
+            originalname
         } = req.body;
 
         // Validate that all required fields are provided
@@ -112,6 +114,9 @@ const manualUpdate = async (req, res) => {
         {
             return res.status(402).json({message :'Item already exists , search and add'})
         }
+        const authClient = await authorize();
+        const imageUrl = await uploadFileToDrive(authClient, path, originalname);
+
         const newItem = new Item({
             itemName: itemName,
             description: description,
@@ -122,7 +127,8 @@ const manualUpdate = async (req, res) => {
                     unit: unit
                 }
             ],
-            category: category
+            category: category,
+            imageUrl :imageUrl,
         });
 
         const savedItem = await newItem.save();

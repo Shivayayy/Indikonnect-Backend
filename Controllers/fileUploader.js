@@ -3,11 +3,13 @@ const path = require('path');
 const fs = require('fs');
 const { google } = require('googleapis');
 
+//There was a branch merge just for the safety we are doing this
 // Multer configuration
 const uploadDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -16,6 +18,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   },
 });
+
 const uploads = multer({ storage: storage });
 
 // Google Drive API configuration
@@ -40,20 +43,32 @@ async function uploadFileToDrive(authClient, filePath, fileName) {
 
   // Upload the file to Google Drive
   const fileMetadata = { name: fileName };
-  const media = { mimeType: 'image/jpeg', body: require('fs').createReadStream(filePath) };
-  const response = await drive.files.create({ resource: fileMetadata, media: media, fields: 'id, webContentLink' });
-
-  // Set the file permissions to public
-  await drive.permissions.create({
-    fileId: response.data.id,
-    requestBody: { role: 'reader', type: 'anyone' },
+  const media = {
+    mimeType: 'image/jpeg',
+    body: require('fs').createReadStream(filePath),
+  };
+  const response = await drive.files.create({
+    resource: fileMetadata,
+    media: media,
+    fields: 'id',
   });
 
-  return response.data.webContentLink;
+  // Set the file permissions to "anyone with the link can view"
+  await drive.permissions.create({
+    fileId: response.data.id,
+    requestBody: {
+      role: 'reader',
+      type: 'anyone',
+    },
+  });
+
+  // Extract the file ID from the response
+  const fileId = response.data.id;
+
+  // Construct the final URL
+  const imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+
+  return imageUrl;
 }
 
-module.exports = {
-  uploads,
-  uploadFileToDrive,
-  authorize,
-};
+module.exports ={authorize,uploadFileToDrive}
