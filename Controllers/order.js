@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Order = require('../Models/order');
 const Shop = require('../Models/shop'); 
 const shopItemSchema = require('../Models/shopItem');
+const User =require('../Models/user')
 
 const createOrder = async (req, res) => {
   try {
@@ -73,12 +74,23 @@ const allOrderShopkeeper = async (req, res) => {
       return res.status(200).json({ message: 'No orders found' });
     }
 
-    return res.status(200).json(orders);
+    // Fetch customer names for each order
+    const ordersWithCustomerNames = await Promise.all(orders.map(async order => {
+      const customer = await User.findById(order.customerId);
+      return {
+        ...order.toObject(),
+        customerName: customer ? customer.UserName : 'Unknown' // Replace 'Unknown' with a default value if customer is not found
+      };
+    }));
+
+    return res.status(200).json(ordersWithCustomerNames);
   } catch (error) {
     console.error('Error fetching orders:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
 
 const processOrder = async (req, res) => {
   try {

@@ -76,5 +76,12 @@ allOrderShopkeeper
 
 http://localhost:8000/allOrderShopkeeper?status=pending
 
+autoupdate
+{
+    "price" :3,
+    "quantity" :20,
+    "itemId" :"65f95bce3dde2c8a769bf0f6"
+}
+
 
 

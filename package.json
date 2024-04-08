@@ -20,6 +20,7 @@
     "mutter": "^1.0.1",
     "nodeman": "^1.1.2",
     "nodemon": "^3.1.0",
-    "sharp": "^0.33.2"
+    "sharp": "^0.33.2",
+    "uploadthing": "^6.7.0"
   }
 }
