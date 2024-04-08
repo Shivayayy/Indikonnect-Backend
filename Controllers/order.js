@@ -206,30 +206,30 @@ const allOrderShopkeeper = async (req, res) => {
 const processOrder = async (req, res) => {
   try {
     const { status, orderId } = req.body;
+
+    // Check if orderId is provided
+    if (!orderId) {
+      return res.status(400).json({ error: 'Missing orderId in request body' });
+    }
+
     const order = await Order.findOne({ _id: orderId });
-      if (!order) {
-        return res.status(404).json({ error: 'Order not found' });
-      }
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
     if (status === 'reject') {
       order.status = 'rejected';
       await order.save();
-      return res.status(200).json({ message: 'Pick-Up from Shop' });
-    } 
-    else if (status === 'accept') {
-
+      return res.status(200).json({ message: 'Order rejected successfully' });
+    } else if (status === 'accept') {
       if (order.status !== 'pending') {
-        return res.status(400).json({ message: order.status });
-      }
-
-      // Get shopkeeper's location
-      const shopkeeper = await Shop.findOne({ owner: req.user._id });
-      if (!shopkeeper) {
-        return res.status(404).json({ error: 'Shopkeeper not found' });
+        return res.status(400).json({ error: 'Order status is not pending' });
       }
       order.status = 'processing';
       await order.save();
-
-      return res.status(200).json({ deliveryCharge, totalWithDeliveryCharge, distanceInM });
+      return res.status(200).json({ message: 'Order accepted and processing' });
+    } else {
+      return res.status(400).json({ error: 'Invalid status provided' });
     }
   } catch (error) {
     console.error('Error processing order:', error);
