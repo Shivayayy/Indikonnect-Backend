@@ -78,7 +78,7 @@ const createShop = async (req, res) => {
 
     
     const authClient = await authorize();
-    const imageUrl = await uploadFileToDrive(authClient, req.file.path, req.file.originalname);
+    const imageUrl = await uploadFileToDrive(authClient, path, originalname);
 
     const newShop = new Shop({
       shopName: shopName,
