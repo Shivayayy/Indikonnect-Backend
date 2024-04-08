@@ -238,6 +238,34 @@ const processOrder = async (req, res) => {
 };
 
 
+
+const completedOrder = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+
+    // Check if orderId is provided
+    if (!orderId) {
+      return res.status(400).json({ error: 'Missing orderId in request body' });
+    }
+
+    const order = await Order.findOne({ _id: orderId });
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (order.status !== 'processing') {
+      return res.status(400).json({ error: 'Order status is not outForDelivery' });
+    }
+
+    order.status = 'completed';
+    await order.save();
+    return res.status(200).json({ message: 'Order completed successfully' });
+  } catch (error) {
+    console.error('Error completing order:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 const updateInventory = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -300,4 +328,4 @@ function deg2rad(deg) {
 
 
 
-module.exports = { createOrder,allOrderShopkeeper,processOrder,updateInventory ,specificOrderShopkeeper};
+module.exports = { createOrder,allOrderShopkeeper,processOrder,updateInventory ,specificOrderShopkeeper ,completedOrder};
