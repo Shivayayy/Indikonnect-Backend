@@ -70,12 +70,10 @@ async function uploadFileToDrive(authClient, filePath, fileName) {
 const createShop = async (req, res) => {
   try {
     const { shopName, address, latitude, longitude ,path,originalname} = req.body;
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Image file is required' });
-    }
-    console.log(req.file)
+
+
     const authClient = await authorize();
-    const imageUrl = await uploadFileToDrive(authClient, path, originalname);
+    const imageUrl = await uploadFileToDrive(authClient, path,originalname);
 
     const newShop = new Shop({
       shopName: shopName,
@@ -100,3 +98,44 @@ module.exports = {
   createShop,
   uploads,
 };
+
+// const pansaricreateShop = async (req, res) => {
+//   try {
+//     const { shopName, address, latitude, longitude, path, originalname } = req.body;
+
+//     // Ensure that the required fields are provided
+//     if (!shopName || !address || !latitude || !longitude || !path || !originalname) {
+//       return res.status(400).json({ success: false, message: 'Missing required fields' });
+//     }
+
+//     // Authenticate with Google Drive API
+//     const authClient = await authorize();
+
+//     // Upload image file to Google Drive
+//     const imageUrl = await uploadFileToDrive(authClient, path, originalname);
+
+//     // Create a new Shop object
+//     const newShop = new Shop({
+//       shopName: shopName,
+//       owner: req.user._id,
+//       address: address,
+//       location: {
+//         type: 'Point',
+//         coordinates: [longitude, latitude],
+//       },
+//       image: imageUrl,
+//     });
+
+//     // Save the new shop to the database
+//     const savedShop = await newShop.save();
+
+//     // Send success response
+//     res.status(201).json({ success: true, message: 'Shop created successfully', shop: savedShop });
+//   } catch (error) {
+//     // Handle errors
+//     console.error('Error creating shop:', error);
+//     res.status(500).json({ success: false, message: 'Internal server error' });
+//   }
+// };
+
+
